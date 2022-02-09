@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.1738
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Drowsypick_tool", "Drowsypick_tool\Drowsypick_tool.vcxproj", "{7F025FE6-AA6E-47D5-A247-6452935C5BAD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7F025FE6-AA6E-47D5-A247-6452935C5BAD}.Debug|x86.ActiveCfg = Debug|Win32
+		{7F025FE6-AA6E-47D5-A247-6452935C5BAD}.Debug|x86.Build.0 = Debug|Win32
+		{7F025FE6-AA6E-47D5-A247-6452935C5BAD}.Release|x86.ActiveCfg = Release|Win32
+		{7F025FE6-AA6E-47D5-A247-6452935C5BAD}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2E00FE60-DD8C-458B-88A6-AE37E54F18B9}
+	EndGlobalSection
+EndGlobal

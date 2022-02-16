@@ -24,12 +24,11 @@ public:
 	bool initVideoWriter(const std::string localPath);
 
 	int getVideoFrameTotalNum(const std::string& videoPath);
-
-	void getCameraFrameFromQueue();
+	
+	//void getCameraFrameFromQueue();
 
 private:
 	std::atomic<bool> m_isSaveVideo;
-
 	cv::VideoCapture m_videoCapture;
 	cv::Mat m_rgbFrame;
 	cv::VideoWriter m_outputVideo;

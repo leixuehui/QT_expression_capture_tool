@@ -20,7 +20,6 @@ public:
 
 private slots:
 	void operationCamera();
-
 	//void on_rightBtn_clicked();
 
 	//void on_leftBtn_clicked();
@@ -35,11 +34,17 @@ private:
 	void closeCamera();
 	void connectSlot();
 
+	
+	//bool gotoFrame(int nIndex);
+	void videoView(int frameTotal);
+
 	//线程函数
 	void cameraView();
 	std::atomic<int>  m_frameIndex;
 
 	bool m_realTimeFlag; // 是否是实时播放
+	bool left_image_appearance;
+	bool right_image_appearance;
 
 	std::atomic<bool> m_isOpenCamera;
 	std::atomic<bool> m_isVideoPlay;
@@ -60,10 +65,12 @@ private:
 	int t_picture_left, t_picture_right;
 
 protected:
-	//void paintEvent(QPaintEvent *event);
+	void paintEvent(QPaintEvent *event);
 	void timerEvent(QTimerEvent *event);
 	virtual void keyPressEvent(QKeyEvent *ev);
 
+private slots:
+	void operationDisplay();
 
 
 };

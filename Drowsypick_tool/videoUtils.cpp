@@ -23,7 +23,7 @@ bool VideoUtils::openCamera(int cameraId, double frameWidth, double frameHeight,
 		{
 			if (!(m_videoCapture.set(CV_CAP_PROP_FRAME_WIDTH, 1280) && m_videoCapture.set(CV_CAP_PROP_FRAME_HEIGHT, 720)))
 			{
-				msg = "RGB摄像头初始化失败!";
+				msg = " RGB camera init error !";
 			}
 			else
 			{
@@ -32,12 +32,12 @@ bool VideoUtils::openCamera(int cameraId, double frameWidth, double frameHeight,
 		}
 		else
 		{
-			msg = "RGB摄像头索引配置不正确!";
+			msg = " RGB camera Index config error !";
 		}
 	}
 	else
 	{
-		msg = "RGB摄像头被占用!";
+		msg = "RGB camera is occupied !";
 	}
 
 	return false;
@@ -68,11 +68,11 @@ QPixmap VideoUtils::getFrame()
 
 
 
-	////保存视频
-	//if (m_isSaveVideo)
-	//{
-	//	m_outputVideo << m_rgbFrame;
-	//}
+	//保存视频
+	if (m_isSaveVideo)
+	{
+		m_outputVideo << m_rgbFrame;
+	}
 
 	if (!m_rgbFrame.empty())
 	{
@@ -113,7 +113,7 @@ bool VideoUtils::initVideoWriter(const std::string localPath)
 	if (m_videoCapture.isOpened())
 	{
 		bool ret = m_outputVideo.open(localPath, CV_FOURCC('M', 'J', 'P', 'G'), 25.0,
-			cv::Size((int)m_videoCapture.get(CV_CAP_PROP_FRAME_WIDTH), (int)m_videoCapture.get(CV_CAP_PROP_FRAME_HEIGHT)));
+		cv::Size((int)m_videoCapture.get(CV_CAP_PROP_FRAME_WIDTH), (int)m_videoCapture.get(CV_CAP_PROP_FRAME_HEIGHT)));
 
 		return ret;
 	}
@@ -124,20 +124,13 @@ bool VideoUtils::initVideoWriter(const std::string localPath)
 int VideoUtils::getVideoFrameTotalNum(const std::string& videoPath)
 {
 	//获取视频总帧数
-	if (m_videoCapture.isOpened())
-	{
 		CvCapture* pCapture = NULL;
 		if (!(pCapture = cvCaptureFromAVI(videoPath.c_str())))
 		{
 			return -1;
 		}
-
 		return (int)cvGetCaptureProperty(pCapture, CV_CAP_PROP_FRAME_COUNT);
-	}
-	else
-	{
-		return -1;
-	}
+
 }
 
 

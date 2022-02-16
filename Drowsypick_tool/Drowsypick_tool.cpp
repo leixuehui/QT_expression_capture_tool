@@ -16,6 +16,8 @@
 #include <QTime>
 #include <QtWidgets/QMessageBox>
 #include <QKeyEvent>
+#include <thread>
+
 
 #define random(x) rand()%(x)
 
@@ -24,22 +26,10 @@ Drowsypick_tool::Drowsypick_tool(QWidget *parent)
     : QWidget(parent), 
 	ui(new Ui::Drowsypick_tool)
 {
-
 	initWidget();
 	initCamera();
-
-	QImage image1("C:\\Users\\lxh8557\\Pictures\\test.png");
-	ui->label_left->setPixmap(QPixmap::fromImage(image1));
-	ui->label_right->setPixmap(QPixmap::fromImage(image1));
-	time_left = new QTime;
-	time_right = new QTime;
-	int rand_left =  6;
-	int rand_right =10;
-	t_picture_left = startTimer(1000 * rand_left);
-	t_picture_right = startTimer(1000 * rand_right);
-	qDebug() << rand_left;
-	qDebug() << rand_right;
-	
+	m_isVideoPlay = true;
+	connectSlot();
 }
 
 Drowsypick_tool::~Drowsypick_tool()
@@ -48,49 +38,99 @@ Drowsypick_tool::~Drowsypick_tool()
 }
 
 
-
 void Drowsypick_tool::initWidget()
 {
 	ui->setupUi(this);
 
-
+	QImage image_background("C:\\Users\\lxh8557\\Pictures\\test.png");
+	ui->label_left->setPixmap(QPixmap::fromImage(image_background));
+	ui->label_right->setPixmap(QPixmap::fromImage(image_background));
 
 }
 
 
+
+
 void Drowsypick_tool::connectSlot()
 {
-	connect(ui->PLAY, &QPushButton::clicked, this, &Drowsypick_tool::operationCamera);
+	connect(ui->PLAY, &QPushButton::clicked, this, &Drowsypick_tool::operationDisplay);
+	connect(ui->exit1, &QPushButton::clicked, this, [=]()
+	{
+	 // ui->setAttribute(Qt::WA_DeleteOnClose);
+		close();
+		QApplication* app;
+		app->exit(0);
+	});
 
+	//connect(ui->exit1, SIGNAL(clicked()), this, SLOT(close()));
+	//connect(sEditors, SIGNAL(closeWindow()), this, SLOT());
 
+}
+
+void Drowsypick_tool::operationDisplay()
+{
+	time_left = new QTime;
+	time_right = new QTime;
+
+	left_image_appearance = false;
+	right_image_appearance = false;
+
+	int rand_left = 30;
+	int rand_right = 150;
+	t_picture_left = startTimer(1000 * rand_left);
+	t_picture_right = startTimer(1000 * rand_right);
+
+	std::string filePath = "20211209_152611.avi";
+
+	m_video->openVideo(filePath);
+	int totalFrameNum = m_video->getVideoFrameTotalNum(filePath);
+	std::thread threadVideo([this, totalFrameNum]() {videoView(totalFrameNum); });
+	threadVideo.detach();
+
+	qDebug() << rand_left;
+	qDebug() << rand_right;
 
 }
 
 
 void Drowsypick_tool::operationCamera()
 {
-	
-		openCamera();
 
-
+	std::thread threadCamera(&Drowsypick_tool::cameraView, this);
+	threadCamera.detach();
 }
 
 void Drowsypick_tool::keyPressEvent(QKeyEvent *ev)
 {
-	QImage image1("C:\\Users\\lxh8557\\Pictures\\test.png");
-	if (ev->key() == Qt::Key_Left)
+	QImage image_background("C:\\Users\\lxh8557\\Pictures\\test.png");
+	QString output;
+	if (ev->key() == Qt::Key_Left && left_image_appearance==true)
 	{
-		ui->label_left->setPixmap(QPixmap::fromImage(image1));
+		//ui->Drowsypick_tool->reloadPage();
+		ui->label_left->setPixmap(QPixmap::fromImage(image_background));
 		ui->label_left->repaint();
-		//ui->textBrowser_left->append(time_left->elapsed());
-		qDebug() << "The slow operation took" << time_left->elapsed() << "milliseconds";
+		output = "reaction  time of left " + QString::number(time_left->elapsed()) + "  ms";
+		//
+		QString currentTime = QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss");
+		std::string filePath = currentTime.toStdString() + ".avi";
+		m_camera->initVideoWriter(filePath);
+		m_camera->saveVideoEnable(true);
+		//
+
+		QMessageBox::information(NULL, "left time", output, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+		//ui->textBrowser_left->append(QString::number(time_left->elapsed(),10,5));
+		left_image_appearance = false;
 	}
 
-	if (ev->key() == Qt::Key_Right)
+	if (ev->key() == Qt::Key_Right && right_image_appearance == true)
 	{
-		ui->label_right->setPixmap(QPixmap::fromImage(image1));
+		ui->label_right->setPixmap(QPixmap::fromImage(image_background));
 		ui->label_right->repaint();
+		output = "reaction  time of right " + QString::number(time_right->elapsed()) + "  ms";
+		QMessageBox::information(NULL, "right time", output, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+		right_image_appearance = false;
 	}
+
 
 	QWidget::keyPressEvent(ev);
 }
@@ -101,62 +141,49 @@ void Drowsypick_tool::timerEvent(QTimerEvent *event)
 	QImage image("C:\\Users\\lxh8557\\Pictures\\run.png");
 
 	if (event->timerId() == t_picture_left) {       // 判断是哪个定时器
+		left_image_appearance = true;
 		ui->label_left->setPixmap(QPixmap::fromImage(image));
 		ui->label_left->repaint();
 		time_left->start();
+		//QString::number(time_left->elapsed()).toStdString()
+		
+		
 	}
 
 	if (event->timerId() == t_picture_right) {
+		right_image_appearance = true;
 		ui->label_right->setPixmap(QPixmap::fromImage(image));
 		ui->label_right->repaint();
 		time_right->start();
+
 	}
 }
 
 
 
-/*
+
 void Drowsypick_tool::paintEvent(QPaintEvent *event)
 {
 	Q_UNUSED(event);
-	srand((int)time(0));
-	int t_random = random(100);
 
-	
-	QImage image1("C:\\Users\\lxh8557\\Pictures\\test.png");
 
-	
-	QImage image("C:\\Users\\lxh8557\\Pictures\\run.png");
-	if (t_random % 2 == 1)
-	{
-		ui->label_left->setPixmap(QPixmap::fromImage(image));
-		Sleep(1000);
-		//->label_left->hide();
-	}
-	else {
-		ui->label_left->setPixmap(QPixmap::fromImage(image1));
-	}
-	
-	if (t_random % 2 == 0)
-	{
-		ui->label_right->setPixmap(QPixmap::fromImage(image));
-		Sleep(1000);
-		//ui->label_right->hide();
-	}
-	else {
-		ui->label_right->setPixmap(QPixmap::fromImage(image1));
-	}
-	
+	ui->CameraView->setPixmap(m_pixStaticRgbImage);
+	ui->CameraView->setAlignment(Qt::AlignCenter);
+	ui->CameraView->setScaledContents(true);
 	
 }
-*/
+
 
 void Drowsypick_tool::initCamera()
 {
 	m_cameraNameList.clear();
 
 	m_camera = new VideoUtils;
-	//m_video = new VideoUtils;
+	m_video = new VideoUtils;
+	openCamera();
+	operationCamera();
+	
+
 }
 
 
@@ -166,14 +193,14 @@ void Drowsypick_tool::openCamera()
 	listDevices(m_cameraNameList);
 
 
-	if (2 == m_cameraNameList.size())
+	if (1 == m_cameraNameList.size())
 	{
 		m_rgbCameraId = ui->comboBox->currentIndex();
 
 		std::string errMsg;
 		if (!m_camera->openCamera(m_rgbCameraId, 1080, 720, errMsg))
 		{
-			QMessageBox::about(NULL, "提示", QString::fromStdString(errMsg));
+			QMessageBox::about(NULL, "attention", QString::fromStdString(errMsg));
 		}
 		else
 		{
@@ -182,8 +209,10 @@ void Drowsypick_tool::openCamera()
 	}
 	else
 	{
-		QMessageBox::about(NULL, "提示", "摄像头数量不支持！");
+		QMessageBox::about(NULL, "attention", "  Can support the number of camera  ");
 	}
+
+	
 }
 
 void Drowsypick_tool::closeCamera()
@@ -192,16 +221,36 @@ void Drowsypick_tool::closeCamera()
 	Sleep(200);
 }
 
+void Drowsypick_tool::videoView(int frameTotal)
+{
+
+
+	while (m_isVideoPlay)
+	{
+		m_pixStaticRgbImage = m_video->getFrame();
+		if (m_frameIndex == frameTotal - 1)
+		{
+			Sleep(25);
+			m_isVideoPlay = false;
+			//emit signalVideoPlayFinished();
+			break;
+		}
+
+		Sleep(1000);
+	}
+
+	m_video->closeVideo();
+}
+
 void Drowsypick_tool::cameraView()
 {
 	while (m_isOpenCamera)
 	{
-		//Sleep(3);
+		Sleep(3);
 		m_pixRgbImage = m_camera->getFrame();
-
 	}
 
-	ui->CameraView->clear();
+	//ui->CameraView->clear(); //dispay on ui
 	m_camera->closeVideo();
 }
 
